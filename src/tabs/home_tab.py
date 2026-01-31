@@ -1,0 +1,85 @@
+from __future__ import annotations
+
+import tkinter as tk
+from tkinter import ttk
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from main import App
+
+from config import SURFACE
+
+def build_home_tab(app: App) -> None:
+    """Build the home tab UI."""
+    # Create a canvas with scrollbar for scrollable content
+    app.home_canvas = tk.Canvas(app.home_tab, bg=SURFACE, highlightthickness=0)
+    scrollbar = ttk.Scrollbar(app.home_tab, orient="vertical", command=app.home_canvas.yview)
+    app.home_content = ttk.Frame(app.home_canvas, style="Card.TFrame")
+
+    app.home_content.bind("<Configure>", lambda e: app.home_canvas.configure(scrollregion=app.home_canvas.bbox("all")))
+    app.home_canvas.create_window((0, 0), window=app.home_content, anchor="nw", width=280)
+    app.home_canvas.configure(yscrollcommand=scrollbar.set)
+
+    app.home_canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    # Bind mousewheel only when hovering over home tab
+    app.home_canvas.bind("<Enter>", lambda e: app.home_canvas.bind_all("<MouseWheel>", lambda evt: on_home_scroll(app, evt)))
+    app.home_canvas.bind("<Leave>", lambda e: app.home_canvas.unbind_all("<MouseWheel>"))
+
+    app.home_content.columnconfigure(0, weight=1)
+    wrap = 260
+
+    row = 0
+    # Header row with word and favorite star
+    header_frame = ttk.Frame(app.home_content, style="Card.TFrame")
+    header_frame.grid(row=row, column=0, pady=(12, 2), padx=10, sticky="ew")
+
+    header = ttk.Label(header_frame, textvariable=app.word_var, style="Header.TLabel", wraplength=220)
+    header.pack(side="left")
+
+    app.fav_button = ttk.Button(header_frame, textvariable=app.favorite_var, style="Star.TButton", command=app.toggle_home_favorite, width=2)
+    app.fav_button.pack(side="right", padx=(4, 0))
+    row += 1
+
+    # Meta (part_of_speech and date published)
+    meta = ttk.Label(app.home_content, textvariable=app.meta_var, style="Meta.TLabel")
+    meta.grid(row=row, column=0, pady=(0, 8), padx=10, sticky="w")
+    row += 1
+
+    # Short definition (bold)
+    app.short_def_label = ttk.Label(app.home_content, textvariable=app.short_def_var, style="Bold.TLabel",wraplength=wrap, justify="left")
+    app.short_def_label.grid(row=row, column=0, padx=10, pady=(0, 6), sticky="w")
+    row += 1
+
+    # Full definition
+    app.home_definition_label = ttk.Label(app.home_content, textvariable=app.definition_var, style="Body.TLabel", wraplength=wrap, justify="left")
+    app.home_definition_label.grid(row=row, column=0, padx=10, pady=(0, 6), sticky="w")
+    row += 1
+
+    # Usage example
+    usage_label = ttk.Label(app.home_content, textvariable=app.usage_var, style="Italic.TLabel", wraplength=wrap, justify="left")
+    usage_label.grid(row=row, column=0, padx=10, pady=(0, 10), sticky="w")
+    row += 1
+
+    # Examples section
+    examples_header = ttk.Label(app.home_content, text="Examples:", style="Bold.TLabel")
+    examples_header.grid(row=row, column=0, padx=10, pady=(6, 2), sticky="w")
+    row += 1
+
+    app.home_examples_label = ttk.Label(app.home_content, textvariable=app.examples_var, style="Body.TLabel", wraplength=wrap, justify="left")
+    app.home_examples_label.grid(row=row, column=0, padx=10, pady=(0, 10), sticky="w")
+    row += 1
+
+    # Did You Know section
+    dyk_header = ttk.Label(app.home_content, text="Did you know?", style="Bold.TLabel")
+    dyk_header.grid(row=row, column=0, padx=10, pady=(6, 2), sticky="w")
+    row += 1
+
+    app.home_dyk_label = ttk.Label(app.home_content, textvariable=app.dyk_var, style="Body.TLabel", wraplength=wrap, justify="left")
+    app.home_dyk_label.grid(row=row, column=0, padx=10, pady=(0, 16), sticky="w")
+
+
+def on_home_scroll(app: App, event: tk.Event) -> None:
+    """Handle mouse wheel scroll on home tab."""
+    app.home_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
