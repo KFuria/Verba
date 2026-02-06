@@ -40,7 +40,11 @@ def setup_styles(app) -> None:
     style.map("Secondary.TButton", background=[("active", BORDER)])
     style.configure("Flashcard.TLabel", background=SURFACE, foreground=PRIMARY, font=(FONT_FAMILY, 12, "bold"))
     style.configure("FlashcardBody.TLabel", background=SURFACE, foreground=ON_SURFACE, font=(FONT_FAMILY, 9))
-    style.configure("TScrollbar", background=SURFACE, troughcolor=BACKGROUND, bordercolor=SURFACE, arrowcolor=TEXT_SECONDARY)
+    style.configure("TScrollbar", background=SURFACE, troughcolor=BACKGROUND, bordercolor=SURFACE, arrowcolor=CARD, arrowsize=8)
+    style.map("TScrollbar", 
+              background=[('disabled', SURFACE)], 
+              troughcolor=[('disabled', BACKGROUND)], 
+              bordercolor=[('disabled', SURFACE)])
     style.configure("Icon.TButton", background=SURFACE, foreground=PRIMARY, font=("Segoe UI Symbol", 12), padding=(2, 0), borderwidth=0, relief="flat")
     style.map("Icon.TButton", background=[("active", CARD)])
     style.configure("Star.TButton", background=SURFACE, foreground="#FFD700", font=("Segoe UI Symbol", 14), padding=(0, 0), borderwidth=0, relief="flat")

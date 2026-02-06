@@ -13,44 +13,54 @@ from config import SURFACE, CARD, ON_SURFACE, PRIMARY, ON_PRIMARY, FONT_FAMILY, 
 def build_favorites_tab(app: App) -> None:
     """Build the favorites tab UI."""
     
-    # Fixed listbox at top
-    list_frame = ttk.Frame(app.favorites_tab, style="Card.TFrame")
-    list_frame.pack(fill="x", padx=8, pady=(8,4))
+    # Fixed listbox on the left side
+    fav_frame = ttk.Frame(app.favorites_tab, style="Card.TFrame")
+    fav_frame.pack(side="left", fill="y",padx=(4,4), pady=(8,8))
+    
+    # Header
+    app.history_header = ttk.Label(fav_frame, text="Favorites", style="Meta.TLabel")
+    app.history_header.pack(side="top")
+    
+    list_frame = ttk.Frame(fav_frame, style="Card.TFrame")
+    list_frame.pack(side="top", fill="both", expand=True)
+    
+    # listbox
     app.favorites_listbox = tk.Listbox(
-        master=list_frame, height=6, bg=CARD, fg=ON_SURFACE,
+        master=list_frame, height=20, bg=CARD, fg=ON_SURFACE,
         selectbackground=PRIMARY, selectforeground=ON_PRIMARY,
         font=(FONT_FAMILY, 9), relief="flat", highlightthickness=1,
         highlightcolor=PRIMARY, highlightbackground=BORDER
     )
-    app.favorites_listbox.pack(side="left", fill="x", expand=True)
-    list_scroll = ttk.Scrollbar(list_frame, orient="vertical", command=app.favorites_listbox.yview)
+    app.favorites_listbox.pack(side="left", fill="y", expand=True)
+    
+    # listbox scroll
+    list_scroll = ttk.Scrollbar(list_frame, orient="vertical", style="TScrollbar", command=app.favorites_listbox.yview)
     list_scroll.pack(side="right", fill="y")
     app.favorites_listbox.config(yscrollcommand=list_scroll.set)
     app.favorites_listbox.bind("<<ListboxSelect>>", lambda e: on_favorites_select(app,e))
 
     # Remove button below listbox
-    remove_button = ttk.Button(app.favorites_tab, text="Remove", style="Primary.TButton", command=lambda: remove_selected_favorite(app))
-    remove_button.pack(pady=(4, 4))
+    remove_button = ttk.Button(fav_frame, text="Remove", style="Primary.TButton", command=lambda: remove_selected_favorite(app))
+    remove_button.pack(side="bottom",padx=(4, 4), pady=(4, 4))
 
     # Scrollable detail area
     app.favorites_canvas = tk.Canvas(app.favorites_tab, bg=SURFACE, highlightthickness=0)
-    detail_scrollbar = ttk.Scrollbar(app.favorites_tab, orient="vertical", command=app.favorites_canvas.yview)
     app.favorites_detail_frame = ttk.Frame(app.favorites_canvas, style="Card.TFrame")
     app.favorites_detail_frame.bind("<Configure>", lambda e: app.favorites_canvas.configure(scrollregion=app.favorites_canvas.bbox("all")))
     app.favorites_canvas.create_window((0, 0), window=app.favorites_detail_frame, anchor="nw", width=265)
-    app.favorites_canvas.configure(yscrollcommand=detail_scrollbar.set)
     app.favorites_canvas.pack(side="left", fill="both", expand=True, padx=(8,0))
-    detail_scrollbar.pack(side="right", fill="y")
+    # Bind mousewheel only when hovering over canvas
     app.favorites_canvas.bind("<Enter>", lambda e: app.favorites_canvas.bind_all("<MouseWheel>", lambda evt: on_favorites_scroll(app, evt)))
     app.favorites_canvas.bind("<Leave>", lambda e: app.favorites_canvas.unbind_all("<MouseWheel>"))
 
     app.favorites_detail_frame.columnconfigure(0, weight=1)
     wrap = 250
+    
     row = 0
 
     # Placeholder label (shown when no selection)
     app.favorites_placeholder = ttk.Label(app.favorites_detail_frame, textvariable=app.favorites_detail_var, style="Meta.TLabel")
-    app.favorites_placeholder.grid(row=row, column=0, sticky="w", padx=10, pady=(8, 4))
+    app.favorites_placeholder.grid(row=row, column=0, sticky="w", padx=10, pady=(18, 4))
     row += 1
 
     # Word header
@@ -95,6 +105,8 @@ def build_favorites_tab(app: App) -> None:
     app.fav_dyk_label = ttk.Label(app.favorites_detail_frame, textvariable=app.fav_dyk_var, style="Body.TLabel", wraplength=wrap, justify="left")
     app.fav_dyk_label.grid(row=row, column=0, padx=10, pady=(0, 16), sticky="w")
 
+    app.fav_examples_header.grid_remove()
+    app.fav_dyk_header.grid_remove()
 
 def on_favorites_scroll(app: App, event: tk.Event) -> None:
     """Handle mouse wheel scroll on favorites tab."""
@@ -120,6 +132,7 @@ def on_favorites_select(app: App, event: tk.Event) -> None:
 
     # Hide placeholder
     app.favorites_detail_var.set("")
+    app.favorites_placeholder.grid_remove()
 
     app.fav_word_var.set(entry.word)
     app.fav_meta_var.set(f"{entry.pronunciation}  •  {entry.part_of_speech}" if entry.pronunciation else entry.part_of_speech)
@@ -158,3 +171,6 @@ def remove_selected_favorite(app: App) -> None:
     app.fav_dyk_var.set("")
     
     app.favorites_detail_var.set("Select word to display")
+    app.favorites_placeholder.grid()
+    app.fav_examples_header.grid_remove()
+    app.fav_dyk_header.grid_remove()
