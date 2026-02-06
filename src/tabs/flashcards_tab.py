@@ -13,40 +13,26 @@ from config import SURFACE
 
 def build_flashcards_tab(app: App) -> None:
     """Build the flashcards tab UI."""
-    # Scrollable canvas
+    # canvas
     app.flashcard_canvas = tk.Canvas(app.flashcards_tab, bg=SURFACE, highlightthickness=0)
-    scrollbar = ttk.Scrollbar(app.flashcards_tab, orient="vertical", command=app.flashcard_canvas.yview)
     container = ttk.Frame(app.flashcard_canvas, style="Card.TFrame")
-
-    container.bind("<Configure>", lambda e: app.flashcard_canvas.configure(scrollregion=app.flashcard_canvas.bbox("all")))
-    app.flashcard_canvas.create_window((0, 0), window=container, anchor="nw", width=280)
-    app.flashcard_canvas.configure(yscrollcommand=scrollbar.set)
-
+    app.flashcard_canvas.create_window((225, 100), window=container, anchor="n", width=450)
     app.flashcard_canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
-
-    app.flashcard_canvas.bind("<Enter>", lambda e: app.flashcard_canvas.bind_all("<MouseWheel>", lambda evt: on_flashcard_scroll(app, evt)))
-    app.flashcard_canvas.bind("<Leave>", lambda e: app.flashcard_canvas.unbind_all("<MouseWheel>"))
 
     container.columnconfigure(0, weight=1)
-
     title = ttk.Label(container, textvariable=app.flashcard_title_var, style="Flashcard.TLabel", wraplength=260)
-    title.grid(row=0, column=0, pady=(16, 8), padx=10, sticky="w")
-
+    title.grid(row=0, column=0, pady=(16, 8), padx=10)
     app.flashcard_body_label = ttk.Label(container, textvariable=app.flashcard_body_var, style="FlashcardBody.TLabel", wraplength=260, justify="left")
-    app.flashcard_body_label.grid(row=1, column=0, pady=(0, 16), padx=10, sticky="w")
-
-    controls = ttk.Frame(container, style="Card.TFrame")
-    controls.grid(row=2, column=0, pady=8)
-
-    ttk.Button(controls, text="Shuffle", style="Primary.TButton", command=lambda: start_flashcards(app)).grid(row=0, column=0, padx=3)
-    ttk.Button(controls, text="Flip", style="Secondary.TButton", command=lambda: flip_flashcard(app)).grid(row=0, column=1, padx=3)
-    ttk.Button(controls, text="Next", style="Secondary.TButton", command=lambda: next_flashcard(app)).grid(row=0, column=2, padx=3)
-
-
-def on_flashcard_scroll(app: App, event: tk.Event) -> None:
-    """Handle mouse wheel scroll on flashcards tab."""
-    app.flashcard_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+    app.flashcard_body_label.grid(row=1, column=0, pady=(0, 16), padx=10)
+    
+    controls = ttk.Frame(app.flashcard_canvas, style="Card.TFrame")
+    controls.pack(side="bottom", fill="x", padx=10, pady=10)
+    shuffke_btn = ttk.Button(controls, text="Shuffle", style="Primary.TButton", command=lambda: start_flashcards(app))
+    shuffke_btn.pack(side="left", fill="x", padx=10, pady=10)
+    flip_btn = ttk.Button(controls, text="Flip", style="Secondary.TButton", command=lambda: flip_flashcard(app))
+    flip_btn.pack(side="left", fill="x", padx=10, pady=10)
+    next_btn = ttk.Button(controls, text="Next", style="Secondary.TButton", command=lambda: next_flashcard(app))
+    next_btn.pack(side="left", fill="x", padx=10, pady=10)
 
 
 def load_flashcards(app: App) -> None:

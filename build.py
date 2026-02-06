@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 import PyInstaller
 
+VERSION = "v2"
+
 def main() -> None:
     """Build the app executable using PyInstaller."""
     project_root = Path(__file__).parent
@@ -16,7 +18,7 @@ def main() -> None:
         sys.executable, "-m", "PyInstaller",
         "--onefile",           # Single executable
         "--windowed",          # No console window
-        "--name", "Verba",
+        "--name", f"Verba_{VERSION}",   # Executable name
         "--distpath", str(project_root / "dist"),
         "--workpath", str(project_root / "build"),
         "--specpath", str(project_root),
@@ -36,7 +38,7 @@ def main() -> None:
     result = subprocess.run(cmd, cwd=str(project_root))
     
     if result.returncode == 0:
-        exe_path = project_root / "dist" / "Verba.exe"
+        exe_path = project_root / "dist" / f"Verba_{VERSION}.exe"
         print("\n" + "=" * 50)
         print("BUILD SUCCESSFUL!")
         print("=" * 50)
